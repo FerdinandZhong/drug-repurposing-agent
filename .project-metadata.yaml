@@ -1,0 +1,64 @@
+name: Drug Repurposing Agent
+description: >-
+  Agentic drug-repurposing prototype that combines a seeded biomedical
+  knowledge graph, graph traversal, deterministic path scoring, and Claude
+  narration in a Cloudera AI Workbench application.
+author: Cloudera
+specification_version: 1.0
+prototype_version: 1.0
+date: "2026-09-13"
+
+environment_variables:
+  ANTHROPIC_API_KEY:
+    description: "Anthropic API key used by the discovery agent"
+    required: true
+
+runtimes:
+  - editor: JupyterLab
+    kernel: Python 3.11
+    edition: Standard
+
+tasks:
+  - type: run_session
+    name: Install Dependencies
+    script: cai_integration/install.py
+    kernel: python3
+    short_summary: Install Python packages and build the React frontend
+    long_summary: >-
+      Installs the pinned Python dependencies and produces the production
+      frontend bundle from frontend/package.json. This task is safe to rerun.
+    cpu: 2
+    memory: 4
+    gpu: 0
+
+  - type: run_session
+    name: Verify Prepared Demo
+    script: cai_integration/smoke_test.py
+    kernel: python3
+    short_summary: Verify the seeded graph, backend modules, and frontend bundle
+    long_summary: >-
+      Runs offline checks for the committed graph data, graph tools, Python
+      modules, and production frontend. It does not require an API call or
+      an Anthropic key.
+    cpu: 2
+    memory: 2
+    gpu: 0
+
+  - type: start_application
+    name: Drug Repurposing Agent
+    subdomain: drug-repurposing-agent
+    script: cml_app.py
+    kernel: python3
+    short_summary: Launch the drug-repurposing agent application
+    long_summary: >-
+      Serves the production React frontend and Flask API from one CML
+      application. Set ANTHROPIC_API_KEY in the application environment for
+      discovery requests.
+    cpu: 2
+    memory: 4
+    gpu: 0
+    environment_variables:
+      TASK_TYPE:
+        default: START_APPLICATION
+        description: "Marks this AMP task as a Workbench Application launch"
+
