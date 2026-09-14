@@ -1,7 +1,8 @@
 name: Drug Repurposing Agent
 description: >-
   Agentic drug-repurposing prototype that combines a seeded biomedical
-  knowledge graph, graph traversal, deterministic path scoring, and Claude
+  knowledge graph, graph traversal, deterministic path scoring, and configurable
+  LLM narration
   narration in a Cloudera AI Workbench application.
 author: Cloudera
 specification_version: 1.0
@@ -19,12 +20,6 @@ environment_variables:
     required: false
   LLM_BASE_URL:
     description: "Optional OpenAI-compatible API base URL"
-    required: false
-  OPENAI_API_KEY:
-    description: "OpenAI-compatible provider token alias"
-    required: false
-  OPENAI_API_BASE:
-    description: "OpenAI-compatible API base URL alias"
     required: false
   LLM_API_KEY:
     description: "Provider token; aliases OPENAI_API_KEY, CAII_API_KEY, API_TOKEN, and ANTHROPIC_API_KEY are also accepted"
