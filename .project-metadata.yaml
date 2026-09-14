@@ -19,12 +19,15 @@ environment_variables:
     description: "Model identifier accepted by the configured endpoint"
     required: false
   LLM_BASE_URL:
+    default: ""
     description: "Optional OpenAI-compatible API base URL"
     required: false
   LLM_API_KEY:
+    default: ""
     description: "Provider token; aliases OPENAI_API_KEY, CAII_API_KEY, API_TOKEN, and ANTHROPIC_API_KEY are also accepted"
     required: false
   ANTHROPIC_API_KEY:
+    default: ""
     description: "Backward-compatible Anthropic token alias"
     required: false
 
