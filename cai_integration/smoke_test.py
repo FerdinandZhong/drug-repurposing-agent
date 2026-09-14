@@ -6,7 +6,18 @@ import ast
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+def project_root() -> Path:
+    """Resolve the project root in a script or a Workbench notebook cell."""
+    script_path = globals().get("__file__")
+    if script_path:
+        return Path(script_path).resolve().parents[1]
+    for candidate in (Path.cwd(), Path("/home/cdsw")):
+        if (candidate / "data" / "seed_graph.json").is_file() and (candidate / "backend").is_dir():
+            return candidate
+    raise RuntimeError("Could not locate the drug-repurposing project root")
+
+
+ROOT = project_root()
 sys.path.insert(0, str(ROOT / "backend"))
 
 

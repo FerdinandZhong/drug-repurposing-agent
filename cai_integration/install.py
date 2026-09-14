@@ -6,7 +6,18 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+def project_root() -> Path:
+    """Resolve the project root in a script or a Workbench notebook cell."""
+    script_path = globals().get("__file__")
+    if script_path:
+        return Path(script_path).resolve().parents[1]
+    for candidate in (Path.cwd(), Path("/home/cdsw")):
+        if (candidate / "requirements.txt").is_file() and (candidate / "frontend").is_dir():
+            return candidate
+    raise RuntimeError("Could not locate the drug-repurposing project root")
+
+
+ROOT = project_root()
 
 
 def run(command: list[str], *, cwd: Path = ROOT) -> None:
@@ -26,4 +37,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

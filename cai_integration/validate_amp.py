@@ -5,7 +5,18 @@ from pathlib import Path
 
 import yaml
 
-ROOT = Path(__file__).resolve().parents[1]
+def project_root() -> Path:
+    """Resolve the project root in a script or a Workbench notebook cell."""
+    script_path = globals().get("__file__")
+    if script_path:
+        return Path(script_path).resolve().parents[1]
+    for candidate in (Path.cwd(), Path("/home/cdsw")):
+        if (candidate / ".project-metadata.yaml").is_file() and (candidate / "project.yaml").is_file():
+            return candidate
+    raise RuntimeError("Could not locate the drug-repurposing project root")
+
+
+ROOT = project_root()
 METADATA = ROOT / ".project-metadata.yaml"
 PROJECT = ROOT / "project.yaml"
 
@@ -47,4 +58,3 @@ def validate() -> dict:
 if __name__ == "__main__":
     manifest = validate()
     print(f"AMP metadata OK — {len(manifest['tasks'])} tasks")
-
