@@ -2,11 +2,11 @@ from flask import Flask, jsonify, send_from_directory, request, Response, stream
 from flask_cors import CORS
 import os
 import json
-import anthropic
 import time
 
 from tools.graph_tools import bfs_find_paths, generate_mechanism_summary, score_repurposing_opportunity
 from agents.discovery_agent import run_discovery_agent
+from agents.llm_client import LLM_API_KEY, complete
 
 # CML project directory
 if os.path.exists('/home/cdsw'):
@@ -27,22 +27,15 @@ with open(SEED_GRAPH_PATH, 'r') as f:
 
 print(f"✓ Loaded seed graph: {len(SEED_GRAPH['entities'])} entities, {len(SEED_GRAPH['relationships'])} relationships")
 
-# Initialize Claude client
-claude_client = None
-ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
-
-if ANTHROPIC_API_KEY:
-    claude_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    print("✓ Claude API client initialized")
+# Report token configuration without creating a network client at import time.
+if LLM_API_KEY:
+    print("✓ LLM API token configured")
 else:
-    print("⚠️  Warning: ANTHROPIC_API_KEY not set")
+    print("⚠️  Warning: no LLM API token configured")
 
 
-def extract_triplets_with_claude(text: str) -> list:
-    """Extract knowledge triplets from text using Claude"""
-    
-    if not claude_client:
-        raise Exception("Claude API client not initialized. Set ANTHROPIC_API_KEY environment variable.")
+def extract_triplets_with_llm(text: str) -> list:
+    """Extract knowledge triplets using the configured LLM provider."""
     
     # Load prompt template
     prompt_path = os.path.join(PROJECT_DIR, 'prompts/extract_triplets.txt')
@@ -52,20 +45,9 @@ def extract_triplets_with_claude(text: str) -> list:
     # Fill in the publication text
     prompt = prompt_template.replace('{PUBLICATION_TEXT}', text)
     
-    print(f"🤖 Calling Claude API to extract triplets...")
+    print("🤖 Calling configured LLM to extract triplets...")
     
-    # Call Claude
-    response = claude_client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=4000,
-        messages=[{
-            "role": "user",
-            "content": prompt
-        }]
-    )
-    
-    # Extract JSON from response
-    response_text = response.content[0].text
+    response_text = complete(prompt, max_tokens=4000)
     
     # Remove markdown code fences if present
     response_text = response_text.replace('```json', '').replace('```', '').strip()
@@ -151,7 +133,7 @@ def upload_publication():
         print(f"✓ Received publication: {file.filename} ({len(content)} characters)")
         
         # Extract triplets with Claude
-        triplets = extract_triplets_with_claude(content)
+        triplets = extract_triplets_with_llm(content)
         
         return jsonify({
             'success': True,

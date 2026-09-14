@@ -1,16 +1,7 @@
-"""
-Single discovery agent using Claude API
-"""
+"""Discovery agent using the configured LLM provider."""
 import json
 import os
-from anthropic import Anthropic
-
-# Initialize Claude client
-ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
-if not ANTHROPIC_API_KEY:
-    raise ValueError("ANTHROPIC_API_KEY environment variable not set")
-
-claude_client = Anthropic(api_key=ANTHROPIC_API_KEY)
+from agents.llm_client import complete
 
 def run_discovery_agent(question: str, path_data: dict) -> dict:
     """
@@ -30,18 +21,7 @@ def run_discovery_agent(question: str, path_data: dict) -> dict:
     
     print(f"🤖 Discovery Agent analyzing pathway...")
     
-    # Call Claude
-    response = claude_client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=2000,
-        messages=[{
-            "role": "user",
-            "content": prompt
-        }]
-    )
-    
-    # Extract JSON from response
-    response_text = response.content[0].text
+    response_text = complete(prompt, max_tokens=2000)
     
     # DEBUG: Print raw response
     print("=" * 80)

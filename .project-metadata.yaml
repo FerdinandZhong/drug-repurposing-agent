@@ -9,9 +9,29 @@ prototype_version: 1.0
 date: "2026-09-13"
 
 environment_variables:
+  LLM_PROVIDER:
+    default: "openai-compatible"
+    description: "LLM provider: openai-compatible (or anthropic)"
+    required: false
+  LLM_MODEL:
+    default: "gpt-4o-mini"
+    description: "Model identifier accepted by the configured endpoint"
+    required: false
+  LLM_BASE_URL:
+    description: "Optional OpenAI-compatible API base URL"
+    required: false
+  OPENAI_API_KEY:
+    description: "OpenAI-compatible provider token alias"
+    required: false
+  OPENAI_API_BASE:
+    description: "OpenAI-compatible API base URL alias"
+    required: false
+  LLM_API_KEY:
+    description: "Provider token; aliases OPENAI_API_KEY, CAII_API_KEY, API_TOKEN, and ANTHROPIC_API_KEY are also accepted"
+    required: false
   ANTHROPIC_API_KEY:
-    description: "Anthropic API key used by the discovery agent"
-    required: true
+    description: "Backward-compatible Anthropic token alias"
+    required: false
 
 runtimes:
   - editor: JupyterLab
@@ -52,8 +72,8 @@ tasks:
     short_summary: Launch the drug-repurposing agent application
     long_summary: >-
       Serves the production React frontend and Flask API from one CML
-      application. Set ANTHROPIC_API_KEY in the application environment for
-      discovery requests.
+      application. Set LLM_API_KEY (or an accepted token alias) and configure
+      LLM_BASE_URL for an OpenAI-compatible endpoint.
     cpu: 2
     memory: 4
     gpu: 0
@@ -61,4 +81,3 @@ tasks:
       TASK_TYPE:
         default: START_APPLICATION
         description: "Marks this AMP task as a Workbench Application launch"
-
